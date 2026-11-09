@@ -1,7 +1,13 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/admin", "destination": "/frontend/admin.html" },
-    { "source": "/", "destination": "/frontend/user.html" }
+  "builds": [
+    {
+      "src": "frontend/*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/admin", "dest": "/frontend/admin.html" },
+    { "src": "/", "dest": "/frontend/user.html" }
   ]
 }
