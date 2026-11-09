@@ -1,0 +1,88 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('admins').child(auth.uid).exists()",
+        ".write": "$uid === auth.uid",
+        "lastActive": { ".write": true },
+        "name": { ".write": "$uid === auth.uid" },
+        "photo": { ".write": "$uid === auth.uid" },
+        "username": { ".write": "$uid === auth.uid" }
+      }
+    },
+    "prompts": {
+      ".read": true,
+      ".write": false,
+      "$pid": {
+        "likes": {
+          ".write": "auth !== null"
+        }
+      }
+    },
+    "categories": {
+      ".read": true,
+      ".write": false
+    },
+    "links": {
+      ".read": true,
+      ".write": false
+    },
+    "analytics": {
+      ".read": false,
+      "ads": {
+        "$date": {
+          ".write": "auth !== null",
+          ".read": false
+        }
+      },
+      "totalAds": {
+        ".write": "auth !== null",
+        ".read": false
+      }
+    },
+    "wallets": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": false
+      }
+    },
+    "wallet_transactions": {
+      ".read": false,
+      ".write": false
+    },
+    "payment_orders": {
+      "$oid": {
+        ".read": "auth !== null && data.child('userId').val() === auth.uid",
+        ".write": false
+      }
+    },
+    "user_entitlements": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": false
+      }
+    },
+    "packages": {
+      ".read": true,
+      ".write": false
+    },
+    "premium_pricing": {
+      ".read": true,
+      ".write": false
+    },
+    "purchase_history": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": false
+      }
+    },
+    "audit_logs": {
+      ".read": false,
+      ".write": false
+    },
+    "payment_methods": {
+      ".read": true,
+      ".write": false
+    }
+  }
+}
