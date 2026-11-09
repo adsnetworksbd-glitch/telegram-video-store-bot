@@ -408,6 +408,7 @@ let allOrders = [];
 
 // ─── LOGIN ───
 function doLogin() {
+    BACKEND_URL = 'https://telegram-video-store-bot.onrender.com';
     const val = document.getElementById('admin-secret-input').value.trim();
     if (!val) return;
     ADMIN_SECRET = val;
