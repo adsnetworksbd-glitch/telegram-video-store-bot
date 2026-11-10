@@ -6,385 +6,478 @@
     <title>Admin - Unique Prompt</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
-        .sidebar-item.active { background-color: #e0e7ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
-        #sidebar { transition: transform 0.3s ease-in-out; }
-        .sidebar-open { transform: translateX(0) !important; }
-        .cat-scroll::-webkit-scrollbar { width: 6px; }
-        .cat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
-        .badge-paid { background:#dcfce7;color:#15803d; }
-        .badge-pending { background:#fef9c3;color:#a16207; }
-        .badge-failed { background:#fee2e2;color:#b91c1c; }
-        .badge-verifying { background:#dbeafe;color:#1d4ed8; }
-        .badge-expired { background:#f3f4f6;color:#6b7280; }
-        #login-screen { position:fixed;inset:0;background:#f8fafc;z-index:999; }
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #0f172a; color: #e2e8f0; }
+        .sidebar { background: #1e293b; border-right: 1px solid #334155; }
+        .sidebar-item { transition: all 0.2s; border-left: 3px solid transparent; }
+        .sidebar-item:hover { background: #334155; color: #818cf8; }
+        .sidebar-item.active { background: #312e81; color: #818cf8; border-left: 3px solid #818cf8; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; }
+        .input-field { background: #0f172a; border: 1px solid #334155; color: #e2e8f0; border-radius: 10px; padding: 10px 14px; width: 100%; outline: none; transition: border 0.2s; }
+        .input-field:focus { border-color: #818cf8; }
+        .input-field::placeholder { color: #64748b; }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 10px; padding: 10px 20px; font-weight: 600; transition: all 0.2s; border: none; cursor: pointer; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-danger { background: #dc2626; color: white; border-radius: 8px; padding: 7px 14px; font-weight: 500; cursor: pointer; border: none; }
+        .btn-edit { background: #1d4ed8; color: white; border-radius: 8px; padding: 7px 14px; font-weight: 500; cursor: pointer; border: none; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+        .badge-free { background: #064e3b; color: #34d399; }
+        .badge-pro { background: #78350f; color: #fbbf24; }
+        .badge-paid { background: #064e3b; color: #34d399; }
+        .badge-pending { background: #78350f; color: #fbbf24; }
+        .badge-failed { background: #7f1d1d; color: #f87171; }
+        .stat-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 16px; padding: 20px; }
+        #sidebar { transition: transform 0.3s; }
+        .toggle-bg { background: #334155; }
+        input[type=checkbox]:checked + .toggle-bg { background: #6366f1; }
+        #login-overlay { position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .table-row:hover { background: #1a2744; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+        select { background: #0f172a; color: #e2e8f0; }
+        option { background: #1e293b; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden bg-gray-50">
+<body class="min-h-screen">
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="flex items-center justify-center">
-    <div class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm border">
-        <div class="text-center mb-6">
-            <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <i class="fas fa-shield-alt text-indigo-600 text-2xl"></i>
+<!-- LOGIN -->
+<div id="login-overlay">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:24px;padding:40px;width:360px;max-width:95vw;">
+        <div style="text-align:center;margin-bottom:28px;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <i class="fas fa-shield-alt" style="color:white;font-size:24px;"></i>
             </div>
-            <h1 class="text-2xl font-bold text-gray-800">Admin Login</h1>
-            <p class="text-gray-500 text-sm mt-1">Unique Prompt</p>
+            <h1 style="font-size:24px;font-weight:800;color:white;margin-bottom:4px;">Admin Panel</h1>
+            <p style="color:#64748b;font-size:14px;">Unique Prompt</p>
         </div>
-        <input type="password" id="admin-secret-input" placeholder="Enter Admin Secret Key"
-               class="border p-3 rounded-xl w-full outline-none focus:ring-2 focus:ring-indigo-500 mb-3 text-center tracking-widest">
-        <div id="login-error" class="text-red-500 text-sm text-center mb-3 hidden">Invalid secret key</div>
-        <button onclick="doLogin()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700">
-            <i class="fas fa-sign-in-alt mr-2"></i>Login
+        <input type="password" id="login-input" placeholder="Enter Admin Secret Key"
+            style="background:#0f172a;border:1px solid #334155;color:white;border-radius:12px;padding:14px;width:100%;outline:none;text-align:center;letter-spacing:4px;font-size:16px;box-sizing:border-box;margin-bottom:12px;"
+            onkeydown="if(event.key==='Enter')doLogin()">
+        <div id="login-err" style="color:#f87171;font-size:13px;text-align:center;margin-bottom:12px;display:none;">❌ Wrong secret key</div>
+        <button onclick="doLogin()" style="width:100%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;">
+            <i class="fas fa-sign-in-alt" style="margin-right:8px;"></i>Login
         </button>
+        <p style="color:#475569;font-size:11px;text-align:center;margin-top:16px;">Use the ADMIN_SECRET from Render env</p>
     </div>
 </div>
 
-<!-- HEADER -->
-<header class="md:hidden fixed top-0 w-full h-16 bg-white shadow-sm z-20 flex items-center justify-between px-4">
-    <h1 class="text-lg font-bold text-gray-800">Unique <span class="text-indigo-600">Prompt</span></h1>
-    <button onclick="toggleSidebar()" class="text-gray-600 p-2"><i class="fas fa-bars text-xl"></i></button>
-</header>
+<!-- LAYOUT -->
+<div class="flex h-screen overflow-hidden">
 
-<div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-20 hidden md:hidden"></div>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar w-64 flex-shrink-0 flex flex-col fixed inset-y-0 left-0 z-30 transform -translate-x-full md:translate-x-0 md:relative">
+        <div style="padding:20px 24px;border-bottom:1px solid #334155;">
+            <h1 style="font-size:20px;font-weight:800;color:white;">Unique <span style="color:#818cf8;">Prompt</span></h1>
+            <p style="color:#64748b;font-size:11px;margin-top:2px;">Admin Panel v3.0</p>
+        </div>
+        <nav style="flex:1;padding:12px 8px;overflow-y:auto;">
+            <button class="sidebar-item active w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium" onclick="show('dashboard')">
+                <i class="fas fa-chart-pie w-5 text-center"></i> Dashboard
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('users')">
+                <i class="fas fa-users w-5 text-center"></i> Users
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('prompts')">
+                <i class="fas fa-images w-5 text-center"></i> Prompts
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('categories')">
+                <i class="fas fa-tags w-5 text-center"></i> Categories
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('pricing')">
+                <i class="fas fa-dollar-sign w-5 text-center"></i> Premium Pricing
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('packages')">
+                <i class="fas fa-box w-5 text-center"></i> Packages
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('gateway')">
+                <i class="fas fa-network-wired w-5 text-center"></i> Payment Gateway
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('orders')">
+                <i class="fas fa-receipt w-5 text-center"></i> Orders
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('wallets')">
+                <i class="fas fa-wallet w-5 text-center"></i> Wallets
+            </button>
+            <button class="sidebar-item w-full text-left px-4 py-3 rounded-xl mb-1 flex items-center gap-3 text-sm font-medium text-slate-400" onclick="show('links')">
+                <i class="fas fa-link w-5 text-center"></i> App Links
+            </button>
+        </nav>
+        <div style="padding:12px 16px;border-top:1px solid #334155;">
+            <button onclick="logout()" style="width:100%;background:#7f1d1d;color:#fca5a5;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </div>
+    </aside>
 
-<!-- SIDEBAR -->
-<aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-30 flex flex-col transform -translate-x-full md:translate-x-0 md:relative border-r border-gray-200">
-    <div class="h-16 flex items-center px-6 border-b">
-        <h1 class="text-xl font-bold text-gray-800">Unique <span class="text-indigo-600">Prompt</span></h1>
-    </div>
-    <nav class="flex-1 py-4 space-y-1 overflow-y-auto">
-        <button onclick="showSection('dashboard')" id="btn-dashboard" class="sidebar-item active w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-chart-pie w-6"></i> Dashboard</button>
-        <button onclick="showSection('users')" id="btn-users" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-users w-6"></i> Users</button>
-        <button onclick="showSection('prompts')" id="btn-prompts" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-images w-6"></i> Manage Prompts</button>
-        <button onclick="showSection('categories')" id="btn-categories" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-tags w-6"></i> Categories</button>
-        <button onclick="showSection('pricing')" id="btn-pricing" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-dollar-sign w-6"></i> Premium Pricing</button>
-        <button onclick="showSection('packages')" id="btn-packages" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-box w-6"></i> Packages</button>
-        <button onclick="showSection('gateway')" id="btn-gateway" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-network-wired w-6"></i> Payment Gateway</button>
-        <button onclick="showSection('orders')" id="btn-orders" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-receipt w-6"></i> Orders</button>
-        <button onclick="showSection('wallets')" id="btn-wallets" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-wallet w-6"></i> Wallets</button>
-        <button onclick="showSection('links')" id="btn-links" class="sidebar-item w-full text-left px-6 py-3 text-gray-600 hover:bg-gray-50 font-medium"><i class="fas fa-link w-6"></i> App Links</button>
-    </nav>
-    <div class="p-4 border-t text-xs text-gray-400 text-center">Admin Panel v3.0 - Unique Prompt</div>
-</aside>
+    <!-- OVERLAY -->
+    <div id="mob-overlay" class="fixed inset-0 bg-black/60 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-<!-- MAIN -->
-<main class="flex-1 overflow-y-auto p-4 md:p-8 relative mt-16 md:mt-0">
-
-    <!-- DASHBOARD -->
-    <div id="sec-dashboard" class="section">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Overview</h2>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white p-5 rounded-xl shadow-sm border flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center"><i class="fas fa-users"></i></div>
-                <div><p class="text-xs text-gray-500">Total Users</p><h3 id="stat-users" class="text-xl font-bold">0</h3></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border flex items-center gap-3">
-                <div class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fas fa-eye"></i></div>
-                <div><p class="text-xs text-gray-500">Ads (24h)</p><h3 id="stat-ads-today" class="text-xl font-bold">0</h3></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border flex items-center gap-3">
-                <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center"><i class="fas fa-chart-line"></i></div>
-                <div><p class="text-xs text-gray-500">Total Ads</p><h3 id="stat-ads-total" class="text-xl font-bold">0</h3></div>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border flex items-center gap-3">
-                <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center"><i class="fas fa-dollar-sign"></i></div>
-                <div><p class="text-xs text-gray-500">Revenue (USDT)</p><h3 id="stat-revenue" class="text-xl font-bold">0</h3></div>
+    <!-- MAIN -->
+    <main class="flex-1 overflow-y-auto">
+        <!-- TOPBAR -->
+        <div style="background:#1e293b;border-bottom:1px solid #334155;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;">
+            <button class="md:hidden" onclick="toggleSidebar()" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">
+                <i class="fas fa-bars"></i>
+            </button>
+            <span id="page-title" style="font-weight:700;font-size:16px;color:white;">Dashboard</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="background:#312e81;color:#818cf8;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;">
+                    <i class="fas fa-circle" style="font-size:8px;margin-right:4px;color:#34d399;"></i>Admin
+                </span>
             </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white p-5 rounded-xl shadow-sm border">
-                <p class="text-sm text-gray-500 mb-1">Total Deposits</p>
-                <h3 id="stat-deposits" class="text-2xl font-bold text-green-600">$0</h3>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border">
-                <p class="text-sm text-gray-500 mb-1">Pending Orders</p>
-                <h3 id="stat-pending" class="text-2xl font-bold text-yellow-600">0</h3>
-            </div>
-            <div class="bg-white p-5 rounded-xl shadow-sm border">
-                <p class="text-sm text-gray-500 mb-1">Failed Orders</p>
-                <h3 id="stat-failed" class="text-2xl font-bold text-red-500">0</h3>
-            </div>
-        </div>
-    </div>
 
-    <!-- USERS -->
-    <div id="sec-users" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">User List</h2>
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[600px]">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase"><tr><th class="p-4">User</th><th class="p-4">ID</th><th class="p-4">Username</th><th class="p-4">Last Active</th></tr></thead>
-                <tbody id="user-list" class="divide-y divide-gray-100 text-sm"></tbody>
-            </table>
-        </div>
-    </div>
+        <div style="padding:24px;max-width:1200px;">
 
-    <!-- PROMPTS -->
-    <div id="sec-prompts" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Prompt Library</h2>
-        <div class="bg-white p-6 rounded-xl shadow-sm border mb-8">
-            <h3 id="form-title" class="text-lg font-semibold mb-4 text-gray-700">Add New Prompt</h3>
-            <input type="hidden" id="p-id">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <input type="text" id="p-title" placeholder="Title" class="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-indigo-500 mb-4">
-                    <input type="text" id="p-img" placeholder="Image URL (Portrait)" class="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-indigo-500">
+        <!-- DASHBOARD -->
+        <div id="sec-dashboard" class="section active">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">📊 Overview</h2>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;">
+                <div class="stat-card">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:44px;height:44px;background:#312e81;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-users" style="color:#818cf8;"></i>
+                        </div>
+                        <div>
+                            <p style="color:#64748b;font-size:12px;font-weight:600;">TOTAL USERS</p>
+                            <h3 id="d-users" style="font-size:28px;font-weight:800;color:white;">0</h3>
+                        </div>
+                    </div>
                 </div>
-                <div class="border rounded-lg p-2 bg-white">
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase px-1">Select Categories</label>
-                    <div id="p-cat-container" class="cat-scroll h-24 overflow-y-auto grid grid-cols-2 gap-2"></div>
+                <div class="stat-card">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:44px;height:44px;background:#065f46;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-images" style="color:#34d399;"></i>
+                        </div>
+                        <div>
+                            <p style="color:#64748b;font-size:12px;font-weight:600;">TOTAL PROMPTS</p>
+                            <h3 id="d-prompts" style="font-size:28px;font-weight:800;color:white;">0</h3>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <textarea id="p-text" placeholder="Prompt text..." class="border p-2.5 rounded-lg w-full h-24 mb-4 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
-            <div class="flex flex-wrap items-center gap-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <label class="flex items-center gap-2 cursor-pointer select-none">
-                    <input type="checkbox" id="p-premium" onchange="toggleAdOptions()" class="w-5 h-5 text-indigo-600 rounded">
-                    <span class="font-medium text-gray-700">Premium Content</span>
-                </label>
-                <div id="ad-options" class="hidden flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-600">Ads to Unlock:</label>
-                    <input type="number" id="p-ad-count" value="1" min="1" max="10" class="w-16 border p-1 rounded text-center">
+                <div class="stat-card">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:44px;height:44px;background:#78350f;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-eye" style="color:#fbbf24;"></i>
+                        </div>
+                        <div>
+                            <p style="color:#64748b;font-size:12px;font-weight:600;">ADS TODAY</p>
+                            <h3 id="d-ads" style="font-size:28px;font-weight:800;color:white;">0</h3>
+                        </div>
+                    </div>
                 </div>
-                <div class="ml-auto flex gap-2">
-                    <button onclick="resetForm()" id="btn-cancel" class="hidden text-gray-500 hover:text-gray-700 px-4 py-2">Cancel</button>
-                    <button onclick="savePrompt()" id="btn-save" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg transition-all active:scale-95">Add Prompt</button>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[600px]">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase"><tr><th class="p-4">Img</th><th class="p-4">Title</th><th class="p-4">Categories</th><th class="p-4">Status</th><th class="p-4 text-right">Actions</th></tr></thead>
-                <tbody id="prompt-list" class="divide-y divide-gray-100 text-sm"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- CATEGORIES -->
-    <div id="sec-categories" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Manage Categories</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm h-fit">
-                <h3 class="font-bold text-gray-700 mb-4">Add New Category</h3>
-                <div class="flex gap-2">
-                    <input type="text" id="new-cat" placeholder="Category Name" class="border p-2.5 rounded-lg flex-1 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <button onclick="addCategory()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700">Add</button>
+                <div class="stat-card">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:44px;height:44px;background:#1e3a5f;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-chart-line" style="color:#60a5fa;"></i>
+                        </div>
+                        <div>
+                            <p style="color:#64748b;font-size:12px;font-weight:600;">TOTAL ADS</p>
+                            <h3 id="d-total-ads" style="font-size:28px;font-weight:800;color:white;">0</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm">
-                <h3 class="font-bold text-gray-700 mb-4">Reorder, Edit & Delete</h3>
-                <ul id="cat-list" class="space-y-2"></ul>
+            <div class="card p-5">
+                <h3 style="font-weight:700;margin-bottom:12px;color:#94a3b8;font-size:13px;text-transform:uppercase;">Recent Orders (from Firebase)</h3>
+                <div id="d-orders" style="color:#64748b;font-size:14px;">Loading...</div>
             </div>
         </div>
-    </div>
 
-    <!-- PREMIUM PRICING -->
-    <div id="sec-pricing" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Premium Content Pricing</h2>
-        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
-            <i class="fas fa-info-circle mr-2"></i>
-            এখানে প্রতিটি Premium Prompt-এর ব্যক্তিগত দাম ও মেয়াদ সেট করুন। Purchase Enable না থাকলে শুধু Ad-unlock কাজ করবে।
+        <!-- USERS -->
+        <div id="sec-users" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">👥 Users</h2>
+            <div class="card" style="overflow:hidden;overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:500px;">
+                    <thead>
+                        <tr style="background:#0f172a;border-bottom:1px solid #334155;">
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700;">User</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700;">ID</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700;">Username</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;font-weight:700;">Last Active</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-tbody"></tbody>
+                </table>
+            </div>
         </div>
-        <div id="pricing-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
 
-    <!-- PACKAGES -->
-    <div id="sec-packages" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Package Management</h2>
-        <div class="bg-white p-6 rounded-xl shadow-sm border mb-8">
-            <h3 id="pkg-form-title" class="text-lg font-semibold mb-4 text-gray-700">Create New Package</h3>
-            <input type="hidden" id="pkg-id">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <input type="text" id="pkg-name" placeholder="Package Name" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="text" id="pkg-image" placeholder="Package Image URL" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="number" id="pkg-price" placeholder="Price (USDT)" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="number" id="pkg-duration" placeholder="Duration (days)" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-            </div>
-            <textarea id="pkg-desc" placeholder="Package Description" class="border p-2.5 rounded-lg w-full h-20 mb-4 outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
-            <div class="border rounded-lg p-3 mb-4">
-                <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Included Premium Contents</label>
-                <div id="pkg-content-list" class="cat-scroll max-h-32 overflow-y-auto grid grid-cols-2 gap-2"></div>
-            </div>
-            <div class="flex items-center gap-4">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="pkg-active" checked class="w-5 h-5 text-indigo-600 rounded">
-                    <span class="font-medium text-gray-700">Active</span>
-                </label>
-                <div class="ml-auto flex gap-2">
-                    <button onclick="resetPkgForm()" id="pkg-btn-cancel" class="hidden text-gray-500 px-4 py-2">Cancel</button>
-                    <button onclick="savePackage()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700">Save Package</button>
+        <!-- PROMPTS -->
+        <div id="sec-prompts" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">🖼️ Manage Prompts</h2>
+            <div class="card p-6 mb-6">
+                <h3 id="prompt-form-title" style="font-weight:700;font-size:16px;margin-bottom:16px;color:#818cf8;">➕ Add New Prompt</h3>
+                <input type="hidden" id="edit-id">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <input class="input-field" id="p-title" placeholder="Prompt Title *">
+                    <input class="input-field" id="p-img" placeholder="Image URL *">
                 </div>
-            </div>
-        </div>
-        <div id="pkg-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-    </div>
-
-    <!-- PAYMENT GATEWAY -->
-    <div id="sec-gateway" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Payment Gateway Config</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- TRC20 -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                        <span class="w-3 h-3 bg-red-500 rounded-full inline-block"></span> USDT TRC20
-                    </h3>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="trc20-enabled" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                <textarea class="input-field" id="p-text" placeholder="Prompt text..." style="height:80px;resize:none;margin-bottom:12px;"></textarea>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:8px;">Categories</label>
+                    <div id="cat-checks" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:500;">
+                        <input type="checkbox" id="p-premium" onchange="toggleAds()" style="width:18px;height:18px;accent-color:#6366f1;">
+                        Premium Content
                     </label>
-                </div>
-                <div class="space-y-3">
-                    <input type="text" id="trc20-address" placeholder="TRC20 Wallet Address (T...)" class="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="trc20-min" placeholder="Min USDT" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                        <input type="number" id="trc20-max" placeholder="Max USDT" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div id="ads-wrap" style="display:none;align-items:center;gap:8px;">
+                        <label style="font-size:13px;color:#94a3b8;">Ads to unlock:</label>
+                        <input type="number" id="p-ads" value="1" min="1" max="10" class="input-field" style="width:70px;">
                     </div>
-                    <div id="trc20-status" class="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                        Verification: TronScan Public API (Auto) ✅
+                    <div style="margin-left:auto;display:flex;gap:8px;">
+                        <button id="cancel-btn" onclick="resetPromptForm()" style="display:none;background:#334155;color:#94a3b8;border:none;border-radius:10px;padding:10px 18px;font-weight:600;cursor:pointer;">Cancel</button>
+                        <button onclick="savePrompt()" class="btn-primary"><i class="fas fa-save mr-2"></i><span id="save-btn-text">Add Prompt</span></button>
                     </div>
-                    <button onclick="saveGateway('TRC20')" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700">Save TRC20 Config</button>
                 </div>
             </div>
-            <!-- BEP20 -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-gray-700 flex items-center gap-2">
-                        <span class="w-3 h-3 bg-yellow-500 rounded-full inline-block"></span> USDT BEP20
-                    </h3>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="bep20-enabled" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
-                </div>
-                <div class="space-y-3">
-                    <input type="text" id="bep20-address" placeholder="BEP20 Wallet Address (0x...)" class="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-sm">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="bep20-min" placeholder="Min USDT" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                        <input type="number" id="bep20-max" placeholder="Max USDT" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                    </div>
-                    <div id="bep20-status" class="text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                        Verification: BscScan API (Auto) ✅
-                    </div>
-                    <button onclick="saveGateway('BEP20')" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700">Save BEP20 Config</button>
-                </div>
+            <div class="card" style="overflow:hidden;overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:600px;">
+                    <thead>
+                        <tr style="background:#0f172a;border-bottom:1px solid #334155;">
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Img</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Title</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Categories</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Status</th>
+                            <th style="padding:14px 16px;text-align:right;font-size:11px;text-transform:uppercase;color:#64748b;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prompt-tbody"></tbody>
+                </table>
             </div>
         </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-6 text-sm text-amber-800">
-            <i class="fas fa-exclamation-triangle mr-2"></i>
-            <strong>Binance ID পেমেন্ট:</strong> Binance-এর public API Binance ID/Pay দিয়ে করা পেমেন্ট auto-verify সমর্থন করে না। শুধু TRC20 ও BEP20 auto-verify কাজ করে।
-        </div>
-    </div>
 
-    <!-- ORDERS -->
-    <div id="sec-orders" class="section hidden">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Payment Orders</h2>
-            <div class="flex gap-2">
-                <select id="order-filter" onchange="filterOrders()" class="border p-2 rounded-lg text-sm outline-none">
+        <!-- CATEGORIES -->
+        <div id="sec-categories" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">🏷️ Categories</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div class="card p-5">
+                    <h3 style="font-weight:700;margin-bottom:14px;">Add Category</h3>
+                    <div style="display:flex;gap:8px;">
+                        <input class="input-field" id="new-cat" placeholder="Category name" style="flex:1;">
+                        <button onclick="addCat()" class="btn-primary">Add</button>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h3 style="font-weight:700;margin-bottom:14px;">All Categories</h3>
+                    <ul id="cat-list" style="space-y:8px;"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING -->
+        <div id="sec-pricing" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">💰 Premium Pricing</h2>
+            <div style="background:#312e81;border:1px solid #4338ca;border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#a5b4fc;">
+                <i class="fas fa-info-circle mr-2"></i>প্রতিটি Premium Prompt-এর ব্যক্তিগত দাম ও মেয়াদ সেট করুন।
+            </div>
+            <div id="pricing-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;"></div>
+        </div>
+
+        <!-- PACKAGES -->
+        <div id="sec-packages" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">📦 Packages</h2>
+            <div class="card p-6 mb-6">
+                <h3 style="font-weight:700;font-size:16px;margin-bottom:16px;color:#818cf8;">➕ Create Package</h3>
+                <input type="hidden" id="pkg-edit-id">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <input class="input-field" id="pkg-name" placeholder="Package Name *">
+                    <input class="input-field" id="pkg-img" placeholder="Image URL">
+                    <input class="input-field" id="pkg-price" type="number" placeholder="Price (USDT) *">
+                    <input class="input-field" id="pkg-dur" type="number" placeholder="Duration (days) *">
+                </div>
+                <textarea class="input-field" id="pkg-desc" placeholder="Description..." style="height:70px;resize:none;margin-bottom:12px;"></textarea>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:8px;">Included Premium Contents</label>
+                    <div id="pkg-content-checks" style="display:flex;flex-wrap:wrap;gap:8px;max-height:120px;overflow-y:auto;"></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;">
+                        <input type="checkbox" id="pkg-active" checked style="width:18px;height:18px;accent-color:#6366f1;"> Active
+                    </label>
+                    <div style="margin-left:auto;">
+                        <button onclick="savePkg()" class="btn-primary"><i class="fas fa-save mr-2"></i>Save Package</button>
+                    </div>
+                </div>
+            </div>
+            <div id="pkg-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;"></div>
+        </div>
+
+        <!-- GATEWAY -->
+        <div id="sec-gateway" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">🌐 Payment Gateway</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+                <div class="card p-5">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="font-weight:700;display:flex;align-items:center;gap:8px;">
+                            <span style="width:10px;height:10px;background:#ef4444;border-radius:50%;display:inline-block;"></span> USDT TRC20
+                        </h3>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
+                            <input type="checkbox" id="trc-en" style="accent-color:#6366f1;width:16px;height:16px;"> Enabled
+                        </label>
+                    </div>
+                    <input class="input-field mb-3" id="trc-addr" placeholder="TRC20 Address (T...)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                        <input class="input-field" id="trc-min" type="number" placeholder="Min USDT">
+                        <input class="input-field" id="trc-max" type="number" placeholder="Max USDT">
+                    </div>
+                    <div style="background:#0f172a;border-radius:8px;padding:8px 12px;font-size:12px;color:#34d399;margin-bottom:12px;">
+                        ✅ Auto Verify: TronScan Public API
+                    </div>
+                    <button onclick="saveGW('TRC20')" class="btn-primary" style="width:100%;">Save TRC20</button>
+                </div>
+                <div class="card p-5">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h3 style="font-weight:700;display:flex;align-items:center;gap:8px;">
+                            <span style="width:10px;height:10px;background:#f59e0b;border-radius:50%;display:inline-block;"></span> USDT BEP20
+                        </h3>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;">
+                            <input type="checkbox" id="bep-en" style="accent-color:#6366f1;width:16px;height:16px;"> Enabled
+                        </label>
+                    </div>
+                    <input class="input-field mb-3" id="bep-addr" placeholder="BEP20 Address (0x...)">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                        <input class="input-field" id="bep-min" type="number" placeholder="Min USDT">
+                        <input class="input-field" id="bep-max" type="number" placeholder="Max USDT">
+                    </div>
+                    <div style="background:#0f172a;border-radius:8px;padding:8px 12px;font-size:12px;color:#34d399;margin-bottom:12px;">
+                        ✅ Auto Verify: BscScan API
+                    </div>
+                    <button onclick="saveGW('BEP20')" class="btn-primary" style="width:100%;">Save BEP20</button>
+                </div>
+            </div>
+            <div style="background:#78350f;border:1px solid #d97706;border-radius:12px;padding:14px;font-size:13px;color:#fde68a;">
+                <i class="fas fa-exclamation-triangle mr-2"></i>Binance ID পেমেন্ট auto-verify সমর্থিত নয়। শুধু TRC20 ও BEP20 auto-verify কাজ করে।
+            </div>
+        </div>
+
+        <!-- ORDERS -->
+        <div id="sec-orders" class="section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 style="font-size:22px;font-weight:800;">📋 Orders</h2>
+                <select id="order-filter" onchange="filterOrders()" class="input-field" style="width:160px;">
                     <option value="">All Status</option>
                     <option value="pending">Pending</option>
-                    <option value="verifying">Verifying</option>
                     <option value="paid">Paid</option>
                     <option value="failed">Failed</option>
                     <option value="expired">Expired</option>
                 </select>
             </div>
-        </div>
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[700px]">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
-                    <tr><th class="p-4">Order ID</th><th class="p-4">User</th><th class="p-4">Type</th><th class="p-4">Amount</th><th class="p-4">Network</th><th class="p-4">Status</th><th class="p-4">Date</th></tr>
-                </thead>
-                <tbody id="orders-list" class="divide-y divide-gray-100 text-sm"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- WALLETS -->
-    <div id="sec-wallets" class="section hidden">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Wallet Management</h2>
-        </div>
-        <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
-            <h3 class="font-bold text-gray-700 mb-4">Manual Adjustment (Audit Required)</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="adj-user-id" placeholder="User ID" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="number" id="adj-amount" placeholder="Amount (USDT)" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <select id="adj-type" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="credit">Credit (Add)</option>
-                    <option value="debit">Debit (Remove)</option>
-                </select>
-                <input type="text" id="adj-reason" placeholder="Reason (required)" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <input type="text" id="adj-note" placeholder="Admin Note (required)" class="border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-                <button onclick="doWalletAdjust()" class="bg-orange-600 text-white py-2.5 rounded-lg font-medium hover:bg-orange-700">Apply Adjustment</button>
+            <div class="card" style="overflow:hidden;overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:700px;">
+                    <thead>
+                        <tr style="background:#0f172a;border-bottom:1px solid #334155;">
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Order ID</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">User</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Type</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Amount</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Network</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Status</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody"></tbody>
+                </table>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow-sm border overflow-hidden overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[500px]">
-                <thead class="bg-gray-50 text-gray-600 text-xs uppercase">
-                    <tr><th class="p-4">User</th><th class="p-4">User ID</th><th class="p-4">Balance</th><th class="p-4">Updated</th></tr>
-                </thead>
-                <tbody id="wallets-list" class="divide-y divide-gray-100 text-sm"></tbody>
-            </table>
-        </div>
-    </div>
 
-    <!-- APP LINKS -->
-    <div id="sec-links" class="section hidden">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">App Configuration</h2>
-        <div class="bg-white p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <h3 class="font-bold text-blue-800 uppercase text-xs mb-3">Global Settings & Ads</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- WALLETS -->
+        <div id="sec-wallets" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">💳 Wallets</h2>
+            <div class="card p-5 mb-6">
+                <h3 style="font-weight:700;margin-bottom:14px;color:#f87171;">⚠️ Manual Adjustment (Audit Required)</h3>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                    <input class="input-field" id="adj-uid" placeholder="User ID">
+                    <input class="input-field" id="adj-amt" type="number" placeholder="Amount (USDT)">
+                    <select class="input-field" id="adj-type">
+                        <option value="credit">Credit (Add)</option>
+                        <option value="debit">Debit (Remove)</option>
+                    </select>
+                    <input class="input-field" id="adj-reason" placeholder="Reason *">
+                </div>
+                <input class="input-field mb-3" id="adj-note" placeholder="Admin Note *">
+                <button onclick="doAdjust()" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:10px 20px;font-weight:600;cursor:pointer;">
+                    Apply Adjustment
+                </button>
+            </div>
+            <div class="card" style="overflow:hidden;overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;min-width:400px;">
+                    <thead>
+                        <tr style="background:#0f172a;border-bottom:1px solid #334155;">
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">User</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">ID</th>
+                            <th style="padding:14px 16px;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wallet-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- APP LINKS -->
+        <div id="sec-links" class="section">
+            <h2 style="font-size:22px;font-weight:800;margin-bottom:20px;">🔗 App Configuration</h2>
+            <div class="card p-6">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div>
-                        <label class="block text-sm font-medium mb-1">Monetag Zone ID</label>
-                        <input type="text" id="l-monetag" placeholder="e.g. 9860753" class="w-full border p-2 rounded">
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Monetag Zone ID</label>
+                        <input class="input-field" id="l-monetag" placeholder="e.g. 9860753">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">How To Use Video (YouTube)</label>
-                        <input type="text" id="l-video" placeholder="https://youtube.com/..." class="w-full border p-2 rounded">
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Backend API URL</label>
+                        <input class="input-field" id="l-backend" placeholder="https://your-app.onrender.com">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Bot Share Link</label>
-                        <input type="text" id="l-botLink" placeholder="https://t.me/UniquePromptBot" class="w-full border p-2 rounded">
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">How To Use Video</label>
+                        <input class="input-field" id="l-video" placeholder="https://youtube.com/...">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Backend API URL</label>
-                        <input type="text" id="l-backendUrl" placeholder="https://your-app.onrender.com" class="w-full border p-2 rounded">
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Bot Share Link</label>
+                        <input class="input-field" id="l-bot" placeholder="https://t.me/YourBot">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Follow Me Link</label>
+                        <input class="input-field" id="l-follow" placeholder="https://t.me/...">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">How To Use (Channel)</label>
+                        <input class="input-field" id="l-howto" placeholder="https://t.me/...">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Contact</label>
+                        <input class="input-field" id="l-contact" placeholder="https://t.me/...">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Privacy Policy</label>
+                        <input class="input-field" id="l-privacy" placeholder="https://...">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;display:block;margin-bottom:6px;">Developer (Locked)</label>
+                        <input class="input-field" id="l-dev" value="https://t.me/Srabon1111" readonly style="opacity:0.5;cursor:not-allowed;">
                     </div>
                 </div>
+                <button onclick="saveLinks()" class="btn-primary" style="margin-top:20px;width:200px;">
+                    <i class="fas fa-save mr-2"></i>Save All Settings
+                </button>
             </div>
-            <div>
-                <h3 class="font-bold text-gray-400 uppercase text-xs mb-4">Profile Section 1</h3>
-                <div class="space-y-2">
-                    <label class="text-xs">Follow Me Link</label><input type="text" id="l-follow" class="w-full border p-2 rounded">
-                    <label class="text-xs">How to Use (Channel Link)</label><input type="text" id="l-howTo" class="w-full border p-2 rounded">
-                </div>
-            </div>
-            <div>
-                <h3 class="font-bold text-gray-400 uppercase text-xs mb-4">Profile Section 2</h3>
-                <div class="space-y-2">
-                    <label class="text-xs">Contact</label><input type="text" id="l-contact" class="w-full border p-2 rounded">
-                    <label class="text-xs">Developer (Permanent & Locked)</label>
-                    <input type="text" id="l-dev" value="https://t.me/Srabon1111" class="w-full border p-2 rounded bg-gray-100 text-gray-500 cursor-not-allowed" readonly>
-                    <label class="text-xs">Privacy</label><input type="text" id="l-privacy" class="w-full border p-2 rounded">
-                </div>
-            </div>
-            <button onclick="saveLinks()" class="md:col-span-2 bg-green-600 text-white px-6 py-2 rounded-lg justify-self-start hover:bg-green-700">Save Configurations</button>
         </div>
-    </div>
 
-</main>
+        </div><!-- end main content -->
+    </main>
+</div>
 
 <script>
-// ========================================================
-// 👇 Firebase Config
-// ========================================================
+// ════════════════════════════════════════════
+// FIREBASE CONFIG
+// ════════════════════════════════════════════
 const firebaseConfig = {
     apiKey: "AIzaSyDMyPp8J3HG09WvlusxoSt_Fc9qqagbdQU",
     authDomain: "telegram-storebot.firebaseapp.com",
@@ -394,581 +487,536 @@ const firebaseConfig = {
     messagingSenderId: "763175242557",
     appId: "1:763175242557:web:f0b1e6253e444ea7b35354"
 };
-// ========================================================
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const PERMANENT_DEV_LINK = "https://t.me/Srabon1111";
-
+const DEV_LINK = "https://t.me/Srabon1111";
 let ADMIN_SECRET = '';
 let BACKEND_URL = 'https://telegram-video-store-bot.onrender.com';
 let categories = [];
-let promptData = {};
+let prompts = {};
 let allOrders = [];
 
-// ─── LOGIN ───
+// ════ LOGIN ════
 function doLogin() {
-    BACKEND_URL = 'https://telegram-video-store-bot.onrender.com';
-    const val = document.getElementById('admin-secret-input').value.trim();
-    if (!val) return;
-    ADMIN_SECRET = val;
-    // Verify by calling backend
-    fetch(`${getBackendUrl()}/api/admin/analytics`, {
-        headers: { 'x-admin-secret': ADMIN_SECRET }
-    }).then(r => {
-        if (r.ok) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.addEventListener('DOMContentLoaded', () => {});
-            initAdmin();
-        } else {
-            document.getElementById('login-error').classList.remove('hidden');
-            ADMIN_SECRET = '';
-        }
-    }).catch(() => {
-        // Backend might not be set yet — allow login with Firebase-only mode
-        document.getElementById('login-screen').style.display = 'none';
-            initAdmin();
-    });
+    const key = document.getElementById('login-input').value.trim();
+    if (!key) return;
+    ADMIN_SECRET = key;
+    document.getElementById('login-overlay').style.display = 'none';
+    initAdmin();
 }
+document.getElementById('login-input').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 
-document.getElementById('admin-secret-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-});
-
-function getBackendUrl() {
-    return BACKEND_URL || localStorage.getItem('backendUrl') || '';
+function logout() {
+    ADMIN_SECRET = '';
+    document.getElementById('login-overlay').style.display = 'flex';
+    document.getElementById('login-input').value = '';
 }
 
 function initAdmin() {
-    fetchStats(); fetchUsers(); fetchCategories(); fetchPrompts(); fetchLinks();
-    fetchOrders(); fetchWallets(); fetchPricingSection(); fetchPackagesSection();
-    fetchGatewayConfig();
+    fetchDashboard();
+    fetchUsers();
+    fetchPrompts();
+    fetchCategories();
+    fetchOrders();
+    fetchLinks();
+    fetchGateway();
+    fetchWallets();
 }
 
+// ════ SIDEBAR ════
 function toggleSidebar() {
     const sb = document.getElementById('sidebar');
-    sb.classList.toggle('sidebar-open');
-    document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    const ov = document.getElementById('mob-overlay');
+    sb.classList.toggle('-translate-x-full');
+    ov.classList.toggle('hidden');
 }
 
-function showSection(id) {
-    document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
-    document.getElementById('sec-' + id).classList.remove('hidden');
-    document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('btn-' + id).classList.add('active');
-    if (window.innerWidth < 768) toggleSidebar();
+function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(b => {
+        b.classList.remove('active');
+        b.classList.add('text-slate-400');
+    });
+    document.getElementById('sec-'+id).classList.add('active');
+    document.querySelectorAll('.sidebar-item').forEach(b => {
+        if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+id+"'")) {
+            b.classList.add('active');
+            b.classList.remove('text-slate-400');
+        }
+    });
+    const titles = {dashboard:'Dashboard',users:'Users',prompts:'Prompts',categories:'Categories',pricing:'Premium Pricing',packages:'Packages',gateway:'Payment Gateway',orders:'Orders',wallets:'Wallets',links:'App Configuration'};
+    document.getElementById('page-title').innerText = titles[id] || id;
+    if(window.innerWidth < 768) toggleSidebar();
+    if(id==='pricing') fetchPricing();
+    if(id==='packages') fetchPkgs();
 }
 
-// ─── DASHBOARD ───
-function fetchStats() {
-    db.ref('users').on('value', snap => document.getElementById('stat-users').innerText = snap.numChildren());
+// ════ DASHBOARD ════
+function fetchDashboard() {
+    db.ref('users').on('value', s => document.getElementById('d-users').innerText = s.numChildren());
+    db.ref('prompts').on('value', s => document.getElementById('d-prompts').innerText = s.numChildren());
     const today = new Date().toISOString().split('T')[0];
-    db.ref(`analytics/ads/${today}`).on('value', snap => document.getElementById('stat-ads-today').innerText = snap.val() || 0);
-    db.ref(`analytics/totalAds`).on('value', snap => document.getElementById('stat-ads-total').innerText = snap.val() || 0);
-
-    if (getBackendUrl() && ADMIN_SECRET) {
-        fetch(`${getBackendUrl()}/api/admin/analytics`, {
-            headers: { 'x-admin-secret': ADMIN_SECRET }
-        }).then(r => r.json()).then(data => {
-            document.getElementById('stat-revenue').innerText = '$' + (data.totalRevenue || 0);
-            document.getElementById('stat-deposits').innerText = '$' + (data.totalDeposits || 0);
-            document.getElementById('stat-pending').innerText = data.pendingOrders || 0;
-            document.getElementById('stat-failed').innerText = data.failedOrders || 0;
-        }).catch(() => {});
-    }
+    db.ref('analytics/ads/'+today).on('value', s => document.getElementById('d-ads').innerText = s.val()||0);
+    db.ref('analytics/totalAds').on('value', s => document.getElementById('d-total-ads').innerText = s.val()||0);
+    db.ref('payment_orders').limitToLast(5).on('value', snap => {
+        const el = document.getElementById('d-orders');
+        if(!snap.val()) { el.innerHTML='<p style="color:#64748b;font-size:13px;">No orders yet</p>'; return; }
+        let html = '';
+        const orders = [];
+        snap.forEach(s => orders.push({id:s.key,...s.val()}));
+        orders.reverse().forEach(o => {
+            const colors = {paid:'#34d399',pending:'#fbbf24',failed:'#f87171',verifying:'#60a5fa',expired:'#94a3b8'};
+            html += `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #1e293b;font-size:13px;">
+                <span style="color:#94a3b8;font-family:monospace;">${(o.orderId||o.id||'').slice(0,16)}</span>
+                <span style="color:#94a3b8;">${o.amount||0} USDT</span>
+                <span style="color:${colors[o.status]||'#94a3b8'};">●  ${o.status||'pending'}</span>
+            </div>`;
+        });
+        el.innerHTML = html || '<p style="color:#64748b;font-size:13px;">No orders</p>';
+    });
 }
 
-// ─── USERS ───
+// ════ USERS ════
 function fetchUsers() {
     db.ref('users').limitToLast(100).on('value', snap => {
-        const list = document.getElementById('user-list');
-        list.innerHTML = '';
+        const tb = document.getElementById('user-tbody');
+        tb.innerHTML = '';
         const users = [];
         snap.forEach(s => users.push(s.val()));
         users.reverse().forEach(u => {
             const date = u.lastActive ? new Date(u.lastActive).toLocaleDateString() : '-';
-            list.innerHTML += `<tr class="hover:bg-gray-50"><td class="p-4 flex items-center gap-3">
-                <img src="${u.photo}" class="w-8 h-8 rounded-full" onerror="this.src='https://ui-avatars.com/api/?name=${u.name}'">
-                <span class="font-medium">${u.name}</span></td>
-                <td class="p-4 text-xs text-gray-500 font-mono">${u.id || 'N/A'}</td>
-                <td class="p-4 text-gray-600">@${u.username || 'none'}</td>
-                <td class="p-4 text-gray-500">${date}</td></tr>`;
+            tb.innerHTML += `<tr class="table-row" style="border-bottom:1px solid #1e293b;">
+                <td style="padding:12px 16px;display:flex;align-items:center;gap:10px;">
+                    <img src="${u.photo||''}" onerror="this.src='https://ui-avatars.com/api/?name=${u.name||'U'}&background=312e81&color=818cf8'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                    <span style="font-weight:600;font-size:14px;">${u.name||'Unknown'}</span>
+                </td>
+                <td style="padding:12px 16px;font-family:monospace;font-size:12px;color:#64748b;">${u.id||'-'}</td>
+                <td style="padding:12px 16px;font-size:13px;color:#94a3b8;">@${u.username||'none'}</td>
+                <td style="padding:12px 16px;font-size:12px;color:#64748b;">${date}</td>
+            </tr>`;
         });
     });
 }
 
-// ─── PROMPTS ───
-function toggleAdOptions() {
-    const chk = document.getElementById('p-premium').checked;
-    document.getElementById('ad-options').classList.toggle('hidden', !chk);
-}
-
-function fetchPrompts() {
-    db.ref('prompts').on('value', snap => {
-        promptData = snap.val() || {};
-        const list = document.getElementById('prompt-list');
-        list.innerHTML = '';
-        Object.keys(promptData).reverse().forEach(key => {
-            const p = promptData[key];
-            const pCats = Array.isArray(p.categories) ? p.categories : (p.category ? [p.category] : ['All']);
-            const catBadges = pCats.map(c => `<span class="text-[10px] bg-gray-100 border px-1.5 py-0.5 rounded mr-1">${c}</span>`).join('');
-            list.innerHTML += `<tr class="hover:bg-gray-50">
-                <td class="p-4"><img src="${p.img}" class="w-10 h-10 rounded object-cover border"></td>
-                <td class="p-4 font-medium text-gray-800">${p.title}</td>
-                <td class="p-4">${catBadges}</td>
-                <td class="p-4">${p.isPremium ? `<span class="text-xs bg-yellow-100 text-yellow-700 px-2 rounded font-bold">PRO (Ads:${p.adViewsRequired||1})</span>` : '<span class="text-xs bg-green-100 text-green-700 px-2 rounded font-bold">FREE</span>'}</td>
-                <td class="p-4 text-right">
-                    <button onclick="editPrompt('${key}')" class="text-blue-600 hover:bg-blue-50 p-2 rounded"><i class="fas fa-edit"></i></button>
-                    <button onclick="deletePrompt('${key}')" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button>
-                </td></tr>`;
-        });
-    });
-}
-
-function savePrompt() {
-    const id = document.getElementById('p-id').value;
-    const selectedCats = [];
-    document.querySelectorAll('.cat-checkbox:checked').forEach(cb => selectedCats.push(cb.value));
-    if (selectedCats.length === 0) return alert('Please select at least one category.');
-    const data = {
-        title: document.getElementById('p-title').value,
-        img: document.getElementById('p-img').value,
-        categories: selectedCats,
-        category: selectedCats[0],
-        prompt: document.getElementById('p-text').value,
-        isPremium: document.getElementById('p-premium').checked,
-        adViewsRequired: Number(document.getElementById('p-ad-count').value) || 1,
-        updatedAt: firebase.database.ServerValue.TIMESTAMP
-    };
-    if (!data.title || !data.img) return alert('Fill required fields');
-    if (id) {
-        db.ref('prompts/' + id).update(data, e => { if (!e) { alert('Updated!'); resetForm(); } });
-    } else {
-        data.createdAt = firebase.database.ServerValue.TIMESTAMP;
-        data.likes = 0;
-        db.ref('prompts').push().set(data, e => { if (!e) { alert('Added!'); resetForm(); } });
-    }
-}
-
-function editPrompt(key) {
-    const p = promptData[key];
-    document.getElementById('p-id').value = key;
-    document.getElementById('p-title').value = p.title;
-    document.getElementById('p-img').value = p.img;
-    document.getElementById('p-text').value = p.prompt;
-    document.getElementById('p-premium').checked = p.isPremium;
-    document.getElementById('p-ad-count').value = p.adViewsRequired || 1;
-    document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = false);
-    const pCats = Array.isArray(p.categories) ? p.categories : (p.category ? [p.category] : []);
-    pCats.forEach(c => { const el = document.getElementById(`cat-check-${c}`); if (el) el.checked = true; });
-    document.getElementById('form-title').innerText = "Edit Prompt";
-    document.getElementById('btn-save').innerText = "Update Prompt";
-    document.getElementById('btn-save').className = document.getElementById('btn-save').className.replace('bg-indigo-600', 'bg-blue-600');
-    document.getElementById('btn-cancel').classList.remove('hidden');
-    toggleAdOptions();
-    showSection('prompts');
-}
-
-function deletePrompt(key) {
-    if (confirm('Delete this prompt?')) db.ref('prompts/' + key).remove();
-}
-
-function resetForm() {
-    ['p-id','p-title','p-img','p-text'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('p-premium').checked = false;
-    document.getElementById('p-ad-count').value = 1;
-    document.querySelectorAll('.cat-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('form-title').innerText = "Add New Prompt";
-    document.getElementById('btn-save').innerText = "Add Prompt";
-    document.getElementById('btn-cancel').classList.add('hidden');
-    toggleAdOptions();
-}
-
-// ─── CATEGORIES ───
+// ════ CATEGORIES ════
 function fetchCategories() {
     db.ref('categories').on('value', snap => {
         categories = snap.val() || ['All'];
-        if (!categories.includes('All')) categories.unshift('All');
-        const checkContainer = document.getElementById('p-cat-container');
-        checkContainer.innerHTML = categories.map(c => `
-            <label class="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded border hover:bg-indigo-50 cursor-pointer">
-                <input type="checkbox" value="${c}" id="cat-check-${c}" class="cat-checkbox rounded text-indigo-600">
-                <span>${c}</span>
-            </label>`).join('');
-        const manageList = document.getElementById('cat-list');
-        manageList.innerHTML = categories.map((c, i) => `
-            <li class="flex justify-between items-center p-3 bg-gray-50 rounded border group">
-                <span class="font-medium text-gray-700">${i + 1}. ${c}</span>
-                <div class="flex items-center gap-2">
-                    ${c !== 'All' ? `
-                        <div class="flex bg-white rounded border overflow-hidden">
-                            <button onclick="moveCat(${i},-1)" class="px-2 py-1 hover:bg-gray-100 text-gray-500 border-r"><i class="fas fa-arrow-up text-xs"></i></button>
-                            <button onclick="moveCat(${i},1)" class="px-2 py-1 hover:bg-gray-100 text-gray-500 border-r"><i class="fas fa-arrow-down text-xs"></i></button>
-                            <button onclick="editCat(${i})" class="px-2 py-1 hover:bg-gray-100 text-blue-500"><i class="fas fa-edit text-xs"></i></button>
-                        </div>
-                        <button onclick="delCat('${c}')" class="text-red-500 hover:bg-red-50 p-2 rounded"><i class="fas fa-trash"></i></button>
-                    ` : '<span class="text-xs bg-gray-200 px-2 py-1 rounded">System</span>'}
-                </div>
-            </li>`).join('');
-
-        // Update pkg content list
-        const pkgList = document.getElementById('pkg-content-list');
-        if (pkgList) {
-            const premiums = Object.entries(promptData).filter(([k, v]) => v.isPremium);
-            pkgList.innerHTML = premiums.map(([k, v]) => `
-                <label class="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded border cursor-pointer">
-                    <input type="checkbox" value="${k}" class="pkg-content-check rounded text-indigo-600">
-                    <span class="truncate">${v.title}</span>
-                </label>`).join('');
-        }
+        if(!categories.includes('All')) categories.unshift('All');
+        renderCatChecks();
+        renderCatList();
+        renderPkgContentChecks();
     });
 }
 
-function addCategory() {
-    const val = document.getElementById('new-cat').value.trim();
-    if (val && !categories.includes(val)) {
-        categories.push(val);
-        db.ref('categories').set(categories);
-        document.getElementById('new-cat').value = '';
-    } else if (categories.includes(val)) alert('Category already exists!');
+function renderCatChecks() {
+    document.getElementById('cat-checks').innerHTML = categories.map(c =>
+        `<label style="display:flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;">
+            <input type="checkbox" class="cat-cb" value="${c}" style="accent-color:#6366f1;"> ${c}
+        </label>`
+    ).join('');
 }
 
-function editCat(index) {
-    const oldName = categories[index];
-    if (oldName === 'All') return;
-    const newName = prompt("Rename Category:", oldName);
-    if (newName && newName.trim() !== '' && newName !== oldName) {
-        if (categories.includes(newName)) return alert('Already exists!');
-        categories[index] = newName;
+function renderCatList() {
+    document.getElementById('cat-list').innerHTML = categories.map((c,i) =>
+        `<li style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0f172a;border-radius:10px;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:500;">${i+1}. ${c}</span>
+            <div style="display:flex;gap:6px;">
+                ${c!=='All' ? `
+                <button onclick="moveCat(${i},-1)" style="background:#334155;color:#94a3b8;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;"><i class="fas fa-arrow-up"></i></button>
+                <button onclick="moveCat(${i},1)" style="background:#334155;color:#94a3b8;border:none;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;"><i class="fas fa-arrow-down"></i></button>
+                <button onclick="editCat(${i})" class="btn-edit" style="padding:4px 10px;font-size:11px;"><i class="fas fa-edit"></i></button>
+                <button onclick="delCat('${c}')" class="btn-danger" style="padding:4px 10px;font-size:11px;"><i class="fas fa-trash"></i></button>
+                ` : '<span style="font-size:11px;color:#475569;">System</span>'}
+            </div>
+        </li>`
+    ).join('');
+}
+
+function addCat() {
+    const val = document.getElementById('new-cat').value.trim();
+    if(!val || categories.includes(val)) return alert(val ? 'Already exists!' : 'Enter name');
+    categories.push(val);
+    db.ref('categories').set(categories);
+    document.getElementById('new-cat').value = '';
+}
+
+function delCat(c) {
+    if(confirm('Delete "'+c+'"?')) db.ref('categories').set(categories.filter(x=>x!==c));
+}
+
+function editCat(i) {
+    const n = prompt('Rename:', categories[i]);
+    if(n && n.trim() && n!==categories[i]) {
+        if(categories.includes(n)) return alert('Already exists!');
+        const old = categories[i];
+        categories[i] = n;
         db.ref('categories').set(categories);
         db.ref('prompts').once('value', snap => {
             const updates = {};
             snap.forEach(child => {
                 const p = child.val();
-                let pCats = p.categories || (p.category ? [p.category] : []);
-                if (pCats.includes(oldName)) {
-                    pCats = pCats.map(c => c === oldName ? newName : c);
-                    updates[child.key + '/categories'] = pCats;
-                    if (p.category === oldName) updates[child.key + '/category'] = newName;
+                let cats = p.categories || (p.category?[p.category]:[]);
+                if(cats.includes(old)) {
+                    cats = cats.map(x=>x===old?n:x);
+                    updates[child.key+'/categories'] = cats;
+                    if(p.category===old) updates[child.key+'/category'] = n;
                 }
             });
-            if (Object.keys(updates).length > 0) db.ref('prompts').update(updates);
+            if(Object.keys(updates).length) db.ref('prompts').update(updates);
         });
     }
 }
 
-function delCat(c) {
-    if (confirm(`Delete category "${c}"?`)) db.ref('categories').set(categories.filter(x => x !== c));
-}
-
-function moveCat(index, direction) {
-    const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= categories.length) return;
-    if (categories[index] === 'All' || categories[newIndex] === 'All') return;
-    [categories[newIndex], categories[index]] = [categories[index], categories[newIndex]];
+function moveCat(i, dir) {
+    const j = i+dir;
+    if(j<0||j>=categories.length) return;
+    if(categories[i]==='All'||categories[j]==='All') return;
+    [categories[i],categories[j]]=[categories[j],categories[i]];
     db.ref('categories').set(categories);
 }
 
-// ─── PREMIUM PRICING ───
-function fetchPricingSection() {
-    db.ref('prompts').once('value', snap => {
-        const prompts = snap.val() || {};
-        db.ref('premium_pricing').once('value', pSnap => {
-            const pricing = pSnap.val() || {};
-            const container = document.getElementById('pricing-list');
-            const premiums = Object.entries(prompts).filter(([k, v]) => v.isPremium);
-            if (premiums.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm col-span-2">No premium prompts found.</p>';
-                return;
-            }
-            container.innerHTML = premiums.map(([k, v]) => {
-                const p = pricing[k] || {};
-                return `<div class="bg-white p-5 rounded-xl shadow-sm border">
-                    <div class="flex items-center gap-3 mb-3">
-                        <img src="${v.img}" class="w-12 h-12 rounded-lg object-cover border">
-                        <div><p class="font-semibold text-gray-800 text-sm">${v.title}</p><p class="text-xs text-gray-400">ID: ${k}</p></div>
+// ════ PROMPTS ════
+function toggleAds() {
+    document.getElementById('ads-wrap').style.display = document.getElementById('p-premium').checked ? 'flex' : 'none';
+}
+
+function fetchPrompts() {
+    db.ref('prompts').on('value', snap => {
+        prompts = snap.val() || {};
+        const tb = document.getElementById('prompt-tbody');
+        tb.innerHTML = '';
+        Object.keys(prompts).reverse().forEach(k => {
+            const p = prompts[k];
+            const cats = Array.isArray(p.categories)?p.categories:(p.category?[p.category]:['All']);
+            tb.innerHTML += `<tr class="table-row" style="border-bottom:1px solid #1e293b;">
+                <td style="padding:12px 16px;"><img src="${p.img}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;border:1px solid #334155;"></td>
+                <td style="padding:12px 16px;font-weight:600;font-size:14px;">${p.title}</td>
+                <td style="padding:12px 16px;">${cats.map(c=>`<span style="background:#1e293b;border:1px solid #334155;border-radius:6px;padding:2px 8px;font-size:11px;margin-right:4px;">${c}</span>`).join('')}</td>
+                <td style="padding:12px 16px;"><span class="badge ${p.isPremium?'badge-pro':'badge-free'}">${p.isPremium?'PRO':'FREE'}</span></td>
+                <td style="padding:12px 16px;text-align:right;">
+                    <button onclick="editPrompt('${k}')" class="btn-edit" style="margin-right:6px;padding:6px 12px;font-size:12px;"><i class="fas fa-edit"></i></button>
+                    <button onclick="delPrompt('${k}')" class="btn-danger" style="padding:6px 12px;font-size:12px;"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+        renderPkgContentChecks();
+    });
+}
+
+function savePrompt() {
+    const id = document.getElementById('edit-id').value;
+    const selectedCats = [...document.querySelectorAll('.cat-cb:checked')].map(cb=>cb.value);
+    if(!selectedCats.length) return alert('Select at least one category');
+    const data = {
+        title: document.getElementById('p-title').value.trim(),
+        img: document.getElementById('p-img').value.trim(),
+        prompt: document.getElementById('p-text').value.trim(),
+        categories: selectedCats,
+        category: selectedCats[0],
+        isPremium: document.getElementById('p-premium').checked,
+        adViewsRequired: parseInt(document.getElementById('p-ads').value)||1,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    if(!data.title || !data.img) return alert('Title and Image URL required');
+    if(id) {
+        db.ref('prompts/'+id).update(data).then(()=>{ alert('Updated!'); resetPromptForm(); });
+    } else {
+        data.createdAt = firebase.database.ServerValue.TIMESTAMP;
+        data.likes = 0;
+        db.ref('prompts').push(data).then(()=>{ alert('Prompt added!'); resetPromptForm(); });
+    }
+}
+
+function editPrompt(k) {
+    const p = prompts[k];
+    document.getElementById('edit-id').value = k;
+    document.getElementById('p-title').value = p.title;
+    document.getElementById('p-img').value = p.img;
+    document.getElementById('p-text').value = p.prompt;
+    document.getElementById('p-premium').checked = p.isPremium;
+    document.getElementById('p-ads').value = p.adViewsRequired||1;
+    document.querySelectorAll('.cat-cb').forEach(cb=>{
+        const cats = Array.isArray(p.categories)?p.categories:(p.category?[p.category]:[]);
+        cb.checked = cats.includes(cb.value);
+    });
+    document.getElementById('prompt-form-title').innerText = '✏️ Edit Prompt';
+    document.getElementById('save-btn-text').innerText = 'Update Prompt';
+    document.getElementById('cancel-btn').style.display = 'inline-block';
+    toggleAds();
+    show('prompts');
+}
+
+function delPrompt(k) {
+    if(confirm('Delete this prompt?')) db.ref('prompts/'+k).remove();
+}
+
+function resetPromptForm() {
+    document.getElementById('edit-id').value = '';
+    ['p-title','p-img','p-text'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('p-premium').checked = false;
+    document.getElementById('p-ads').value = 1;
+    document.querySelectorAll('.cat-cb').forEach(cb=>cb.checked=false);
+    document.getElementById('prompt-form-title').innerText = '➕ Add New Prompt';
+    document.getElementById('save-btn-text').innerText = 'Add Prompt';
+    document.getElementById('cancel-btn').style.display = 'none';
+    toggleAds();
+}
+
+// ════ PRICING ════
+function fetchPricing() {
+    db.ref('prompts').once('value', pSnap => {
+        db.ref('premium_pricing').once('value', prSnap => {
+            const pricing = prSnap.val()||{};
+            const premiums = Object.entries(pSnap.val()||{}).filter(([k,v])=>v.isPremium);
+            const grid = document.getElementById('pricing-grid');
+            if(!premiums.length) { grid.innerHTML='<p style="color:#64748b;">No premium prompts found.</p>'; return; }
+            grid.innerHTML = premiums.map(([k,v])=>{
+                const p = pricing[k]||{};
+                return `<div class="card p-5">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                        <img src="${v.img}" style="width:50px;height:50px;border-radius:10px;object-fit:cover;border:1px solid #334155;">
+                        <div>
+                            <p style="font-weight:700;font-size:14px;">${v.title}</p>
+                            <p style="font-size:11px;color:#64748b;font-family:monospace;">${k.slice(0,12)}...</p>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 mb-3">
-                        <div><label class="text-xs text-gray-500">Price (USDT)</label>
-                            <input type="number" id="price-${k}" value="${p.price || ''}" placeholder="e.g. 5" class="border p-2 rounded w-full text-sm mt-1"></div>
-                        <div><label class="text-xs text-gray-500">Duration (days)</label>
-                            <input type="number" id="dur-${k}" value="${p.duration || 30}" class="border p-2 rounded w-full text-sm mt-1"></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+                        <div>
+                            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px;">Price (USDT)</label>
+                            <input type="number" id="pr-price-${k}" value="${p.price||''}" placeholder="e.g. 5" class="input-field">
+                        </div>
+                        <div>
+                            <label style="font-size:11px;color:#64748b;display:block;margin-bottom:4px;">Duration (days)</label>
+                            <input type="number" id="pr-dur-${k}" value="${p.duration||30}" class="input-field">
+                        </div>
                     </div>
-                    <label class="flex items-center gap-2 mb-3 cursor-pointer">
-                        <input type="checkbox" id="pe-${k}" ${p.purchaseEnabled ? 'checked' : ''} class="rounded">
-                        <span class="text-sm">Enable Direct Purchase</span>
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;margin-bottom:12px;">
+                        <input type="checkbox" id="pr-en-${k}" ${p.purchaseEnabled?'checked':''} style="accent-color:#6366f1;width:16px;height:16px;">
+                        Enable Direct Purchase
                     </label>
-                    <button onclick="savePricing('${k}')" class="w-full bg-indigo-600 text-white py-2 rounded-lg text-sm hover:bg-indigo-700">Save Pricing</button>
+                    <button onclick="savePricing('${k}')" class="btn-primary" style="width:100%;font-size:13px;">Save Pricing</button>
                 </div>`;
             }).join('');
         });
     });
 }
 
-function savePricing(promptId) {
-    if (!getBackendUrl() || !ADMIN_SECRET) return alert('Backend URL & Admin Secret needed');
+function savePricing(id) {
     const data = {
-        price: parseFloat(document.getElementById(`price-${promptId}`).value),
-        duration: parseInt(document.getElementById(`dur-${promptId}`).value),
-        purchaseEnabled: document.getElementById(`pe-${promptId}`).checked,
+        price: parseFloat(document.getElementById('pr-price-'+id).value)||0,
+        duration: parseInt(document.getElementById('pr-dur-'+id).value)||30,
+        purchaseEnabled: document.getElementById('pr-en-'+id).checked,
         currency: 'USDT'
     };
-    fetch(`${getBackendUrl()}/api/admin/pricing/${promptId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
-        body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => { if (d.success) alert('Pricing saved!'); });
+    db.ref('premium_pricing/'+id).set(data).then(()=>alert('Pricing saved!'));
 }
 
-// ─── PACKAGES ───
-function fetchPackagesSection() {
-    if (!getBackendUrl() || !ADMIN_SECRET) return;
-    fetch(`${getBackendUrl()}/api/admin/packages`, {
-        headers: { 'x-admin-secret': ADMIN_SECRET }
-    }).then(r => r.json()).then(data => {
-        const pkgs = data.packages || [];
-        document.getElementById('pkg-list').innerHTML = pkgs.map(p => `
-            <div class="bg-white p-5 rounded-xl shadow-sm border">
-                <div class="flex items-start justify-between mb-2">
-                    <div>
-                        <h4 class="font-bold text-gray-800">${p.name}</h4>
-                        <p class="text-xs text-gray-500">${p.description}</p>
-                    </div>
-                    <span class="text-xs px-2 py-1 rounded ${p.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${p.isActive ? 'Active' : 'Inactive'}</span>
+// ════ PACKAGES ════
+function renderPkgContentChecks() {
+    const premiums = Object.entries(prompts).filter(([k,v])=>v.isPremium);
+    document.getElementById('pkg-content-checks').innerHTML = premiums.map(([k,v])=>
+        `<label style="display:flex;align-items:center;gap:6px;background:#0f172a;border:1px solid #334155;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" class="pkg-cb" value="${k}" style="accent-color:#6366f1;"> ${v.title}
+        </label>`
+    ).join('');
+}
+
+function fetchPkgs() {
+    db.ref('packages').on('value', snap => {
+        const pkgs = snap.val()||{};
+        const grid = document.getElementById('pkg-grid');
+        grid.innerHTML = Object.keys(pkgs).map(k=>{
+            const p = pkgs[k];
+            return `<div class="card p-5">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px;">
+                    <h4 style="font-weight:700;font-size:15px;">${p.name}</h4>
+                    <span style="background:${p.isActive?'#064e3b':'#334155'};color:${p.isActive?'#34d399':'#94a3b8'};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${p.isActive?'Active':'Inactive'}</span>
                 </div>
-                <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <span><i class="fas fa-dollar-sign mr-1 text-green-500"></i>${p.price} USDT</span>
-                    <span><i class="fas fa-clock mr-1 text-blue-500"></i>${p.duration} days</span>
-                    <span><i class="fas fa-box mr-1 text-purple-500"></i>${(p.contentIds||[]).length} items</span>
+                <p style="font-size:12px;color:#64748b;margin-bottom:10px;">${p.description||''}</p>
+                <div style="display:flex;gap:12px;font-size:12px;color:#94a3b8;margin-bottom:12px;">
+                    <span>💰 ${p.price} USDT</span>
+                    <span>⏱ ${p.duration} days</span>
+                    <span>📦 ${(p.contentIds||[]).length} items</span>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="editPackage('${p.id}')" class="flex-1 border border-blue-500 text-blue-600 py-1.5 rounded-lg text-sm hover:bg-blue-50">Edit</button>
-                    <button onclick="deletePackage('${p.id}')" class="flex-1 border border-red-400 text-red-500 py-1.5 rounded-lg text-sm hover:bg-red-50">Archive</button>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="editPkg('${k}')" class="btn-edit" style="flex:1;font-size:12px;padding:8px;">Edit</button>
+                    <button onclick="delPkg('${k}')" class="btn-danger" style="flex:1;font-size:12px;padding:8px;">Archive</button>
                 </div>
-            </div>`).join('');
-    }).catch(() => {
-        document.getElementById('pkg-list').innerHTML = '<p class="text-gray-400 text-sm">Backend URL needed to manage packages.</p>';
+            </div>`;
+        }).join('') || '<p style="color:#64748b;font-size:13px;">No packages yet</p>';
     });
 }
 
-function savePackage() {
-    if (!getBackendUrl() || !ADMIN_SECRET) return alert('Backend URL & Admin Secret needed');
-    const selectedContent = [];
-    document.querySelectorAll('.pkg-content-check:checked').forEach(cb => selectedContent.push(cb.value));
-    const pkgId = document.getElementById('pkg-id').value;
+function savePkg() {
+    const id = document.getElementById('pkg-edit-id').value;
+    const contentIds = [...document.querySelectorAll('.pkg-cb:checked')].map(cb=>cb.value);
     const data = {
-        name: document.getElementById('pkg-name').value,
-        description: document.getElementById('pkg-desc').value,
-        image: document.getElementById('pkg-image').value,
-        price: parseFloat(document.getElementById('pkg-price').value),
-        duration: parseInt(document.getElementById('pkg-duration').value),
-        contentIds: selectedContent,
-        isActive: document.getElementById('pkg-active').checked
+        name: document.getElementById('pkg-name').value.trim(),
+        description: document.getElementById('pkg-desc').value.trim(),
+        image: document.getElementById('pkg-img').value.trim(),
+        price: parseFloat(document.getElementById('pkg-price').value)||0,
+        duration: parseInt(document.getElementById('pkg-dur').value)||30,
+        contentIds,
+        isActive: document.getElementById('pkg-active').checked,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
     };
-    if (!data.name || !data.price) return alert('Fill required fields');
-    const url = pkgId
-        ? `${getBackendUrl()}/api/admin/packages/${pkgId}`
-        : `${getBackendUrl()}/api/admin/packages`;
-    const method = pkgId ? 'PUT' : 'POST';
-    fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
-        body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => {
-        if (d.success) { alert('Package saved!'); resetPkgForm(); fetchPackagesSection(); }
+    if(!data.name||!data.price) return alert('Name and Price required');
+    if(id) db.ref('packages/'+id).update(data).then(()=>alert('Updated!'));
+    else { data.createdAt=firebase.database.ServerValue.TIMESTAMP; db.ref('packages').push(data).then(()=>alert('Package created!')); }
+}
+
+function editPkg(k) {
+    db.ref('packages/'+k).once('value', snap=>{
+        const p = snap.val();
+        document.getElementById('pkg-edit-id').value = k;
+        document.getElementById('pkg-name').value = p.name;
+        document.getElementById('pkg-desc').value = p.description||'';
+        document.getElementById('pkg-img').value = p.image||'';
+        document.getElementById('pkg-price').value = p.price;
+        document.getElementById('pkg-dur').value = p.duration;
+        document.getElementById('pkg-active').checked = p.isActive;
+        document.querySelectorAll('.pkg-cb').forEach(cb=>cb.checked=(p.contentIds||[]).includes(cb.value));
+        show('packages');
     });
 }
 
-function editPackage(id) {
-    if (!getBackendUrl() || !ADMIN_SECRET) return;
-    fetch(`${getBackendUrl()}/api/admin/packages`, { headers: { 'x-admin-secret': ADMIN_SECRET } })
-        .then(r => r.json()).then(data => {
-            const pkg = (data.packages || []).find(p => p.id === id);
-            if (!pkg) return;
-            document.getElementById('pkg-id').value = id;
-            document.getElementById('pkg-name').value = pkg.name;
-            document.getElementById('pkg-desc').value = pkg.description;
-            document.getElementById('pkg-image').value = pkg.image || '';
-            document.getElementById('pkg-price').value = pkg.price;
-            document.getElementById('pkg-duration').value = pkg.duration;
-            document.getElementById('pkg-active').checked = pkg.isActive;
-            document.querySelectorAll('.pkg-content-check').forEach(cb => {
-                cb.checked = (pkg.contentIds || []).includes(cb.value);
-            });
-            document.getElementById('pkg-form-title').innerText = 'Edit Package';
-            document.getElementById('pkg-btn-cancel').classList.remove('hidden');
-            showSection('packages');
-        });
+function delPkg(k) {
+    if(confirm('Archive this package?')) db.ref('packages/'+k).update({isActive:false});
 }
 
-function deletePackage(id) {
-    if (!confirm('Archive this package?')) return;
-    fetch(`${getBackendUrl()}/api/admin/packages/${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-secret': ADMIN_SECRET }
-    }).then(r => r.json()).then(d => { if (d.success) { alert('Archived!'); fetchPackagesSection(); } });
-}
-
-function resetPkgForm() {
-    document.getElementById('pkg-id').value = '';
-    ['pkg-name','pkg-desc','pkg-image','pkg-price','pkg-duration'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('pkg-active').checked = true;
-    document.querySelectorAll('.pkg-content-check').forEach(cb => cb.checked = false);
-    document.getElementById('pkg-form-title').innerText = 'Create New Package';
-    document.getElementById('pkg-btn-cancel').classList.add('hidden');
-}
-
-// ─── GATEWAY ───
-function fetchGatewayConfig() {
-    db.ref('payment_methods').once('value', snap => {
-        const cfg = snap.val() || {};
-        const trc = cfg.TRC20 || {};
-        const bep = cfg.BEP20 || {};
-        document.getElementById('trc20-enabled').checked = trc.enabled || false;
-        document.getElementById('trc20-address').value = trc.address || '';
-        document.getElementById('trc20-min').value = trc.minAmount || 1;
-        document.getElementById('trc20-max').value = trc.maxAmount || 10000;
-        document.getElementById('bep20-enabled').checked = bep.enabled || false;
-        document.getElementById('bep20-address').value = bep.address || '';
-        document.getElementById('bep20-min').value = bep.minAmount || 1;
-        document.getElementById('bep20-max').value = bep.maxAmount || 10000;
+// ════ GATEWAY ════
+function fetchGateway() {
+    db.ref('payment_methods').once('value', snap=>{
+        const cfg = snap.val()||{};
+        const trc = cfg.TRC20||{};
+        const bep = cfg.BEP20||{};
+        document.getElementById('trc-en').checked = trc.enabled||false;
+        document.getElementById('trc-addr').value = trc.address||'';
+        document.getElementById('trc-min').value = trc.minAmount||1;
+        document.getElementById('trc-max').value = trc.maxAmount||10000;
+        document.getElementById('bep-en').checked = bep.enabled||false;
+        document.getElementById('bep-addr').value = bep.address||'';
+        document.getElementById('bep-min').value = bep.minAmount||1;
+        document.getElementById('bep-max').value = bep.maxAmount||10000;
     });
 }
 
-function saveGateway(network) {
-    if (!getBackendUrl() || !ADMIN_SECRET) {
-        // Fallback: save to Firebase directly
-        const id = network.toLowerCase();
-        const data = {
-            enabled: document.getElementById(`${id}-enabled`).checked,
-            address: document.getElementById(`${id}-address`).value.trim(),
-            minAmount: parseFloat(document.getElementById(`${id}-min`).value) || 1,
-            maxAmount: parseFloat(document.getElementById(`${id}-max`).value) || 10000
-        };
-        db.ref(`payment_methods/${network}`).set(data, e => {
-            if (!e) alert(`${network} config saved!`);
-        });
-        return;
-    }
-    const id = network.toLowerCase();
+function saveGW(net) {
+    const id = net.toLowerCase().slice(0,3);
     const data = {
-        enabled: document.getElementById(`${id}-enabled`).checked,
-        address: document.getElementById(`${id}-address`).value.trim(),
-        minAmount: parseFloat(document.getElementById(`${id}-min`).value) || 1,
-        maxAmount: parseFloat(document.getElementById(`${id}-max`).value) || 10000
+        enabled: document.getElementById(id+'-en').checked,
+        address: document.getElementById(id+'-addr').value.trim(),
+        minAmount: parseFloat(document.getElementById(id+'-min').value)||1,
+        maxAmount: parseFloat(document.getElementById(id+'-max').value)||10000
     };
-    fetch(`${getBackendUrl()}/api/admin/payment-methods/${network}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
-        body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => { if (d.success) alert(`${network} config saved!`); });
+    db.ref('payment_methods/'+net).set(data).then(()=>alert(net+' config saved!'));
 }
 
-// ─── ORDERS ───
+// ════ ORDERS ════
 function fetchOrders() {
-    db.ref('payment_orders').on('value', snap => {
+    db.ref('payment_orders').on('value', snap=>{
         allOrders = [];
-        snap.forEach(s => { allOrders.push({ id: s.key, ...s.val() }); });
-        allOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        snap.forEach(s=>allOrders.push({id:s.key,...s.val()}));
+        allOrders.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         renderOrders(allOrders);
     });
 }
 
 function filterOrders() {
-    const filter = document.getElementById('order-filter').value;
-    renderOrders(filter ? allOrders.filter(o => o.status === filter) : allOrders);
+    const f = document.getElementById('order-filter').value;
+    renderOrders(f ? allOrders.filter(o=>o.status===f) : allOrders);
 }
 
 function renderOrders(orders) {
-    const list = document.getElementById('orders-list');
-    if (!orders.length) { list.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-400">No orders found</td></tr>'; return; }
-    list.innerHTML = orders.slice(0, 100).map(o => {
-        const date = o.createdAt ? new Date(o.createdAt).toLocaleString() : '-';
-        return `<tr class="hover:bg-gray-50">
-            <td class="p-4 font-mono text-xs">${o.orderId || o.id}</td>
-            <td class="p-4 text-xs text-gray-500">${o.userId || '-'}</td>
-            <td class="p-4"><span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">${o.type || '-'}</span></td>
-            <td class="p-4 font-medium">${o.amount || 0} USDT</td>
-            <td class="p-4 text-xs">${o.network || o.paymentMethod || 'wallet'}</td>
-            <td class="p-4"><span class="text-xs px-2 py-1 rounded font-bold badge-${o.status || 'pending'}">${o.status || 'pending'}</span></td>
-            <td class="p-4 text-xs text-gray-500">${date}</td></tr>`;
+    const tb = document.getElementById('orders-tbody');
+    if(!orders.length){ tb.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:#64748b;">No orders found</td></tr>'; return; }
+    const colors = {paid:'#34d399',pending:'#fbbf24',failed:'#f87171',verifying:'#60a5fa',expired:'#94a3b8'};
+    tb.innerHTML = orders.slice(0,100).map(o=>{
+        const date = o.createdAt ? new Date(o.createdAt).toLocaleDateString() : '-';
+        return `<tr class="table-row" style="border-bottom:1px solid #1e293b;">
+            <td style="padding:12px 16px;font-family:monospace;font-size:11px;color:#818cf8;">${(o.orderId||o.id||'').slice(0,16)}</td>
+            <td style="padding:12px 16px;font-size:12px;color:#94a3b8;">${(o.userId||'-').slice(0,10)}</td>
+            <td style="padding:12px 16px;"><span style="background:#1e3a5f;color:#60a5fa;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;">${o.type||'-'}</span></td>
+            <td style="padding:12px 16px;font-weight:600;color:#34d399;">${o.amount||0} USDT</td>
+            <td style="padding:12px 16px;font-size:12px;color:#94a3b8;">${o.network||o.paymentMethod||'wallet'}</td>
+            <td style="padding:12px 16px;"><span style="color:${colors[o.status]||'#94a3b8'};font-weight:700;font-size:12px;">● ${o.status||'pending'}</span></td>
+            <td style="padding:12px 16px;font-size:12px;color:#64748b;">${date}</td>
+        </tr>`;
     }).join('');
 }
 
-// ─── WALLETS ───
+// ════ WALLETS ════
 function fetchWallets() {
-    if (!getBackendUrl() || !ADMIN_SECRET) return;
-    fetch(`${getBackendUrl()}/api/admin/wallets`, { headers: { 'x-admin-secret': ADMIN_SECRET } })
-        .then(r => r.json()).then(data => {
-            const list = document.getElementById('wallets-list');
-            (data.wallets || []).forEach(w => {
-                const date = w.updatedAt ? new Date(w.updatedAt).toLocaleDateString() : '-';
-                list.innerHTML += `<tr class="hover:bg-gray-50">
-                    <td class="p-4 font-medium">${w.name}</td>
-                    <td class="p-4 text-xs font-mono text-gray-500">${w.userId}</td>
-                    <td class="p-4 font-bold text-green-600">$${parseFloat(w.balance || 0).toFixed(2)}</td>
-                    <td class="p-4 text-gray-400 text-xs">${date}</td></tr>`;
-            });
-        }).catch(() => {});
-}
-
-function doWalletAdjust() {
-    if (!getBackendUrl() || !ADMIN_SECRET) return alert('Backend URL needed');
-    const data = {
-        userId: document.getElementById('adj-user-id').value.trim(),
-        amount: parseFloat(document.getElementById('adj-amount').value),
-        type: document.getElementById('adj-type').value,
-        reason: document.getElementById('adj-reason').value.trim(),
-        adminNote: document.getElementById('adj-note').value.trim()
-    };
-    if (!data.userId || !data.amount || !data.reason || !data.adminNote) return alert('All fields required');
-    if (!confirm(`${data.type === 'credit' ? 'Credit' : 'Debit'} $${data.amount} for user ${data.userId}?`)) return;
-    fetch(`${getBackendUrl()}/api/admin/wallet/adjust`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-admin-secret': ADMIN_SECRET },
-        body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => {
-        if (d.success) { alert(`Done! New balance: $${d.newBalance}`); fetchWallets(); }
-        else alert('Error: ' + JSON.stringify(d));
+    db.ref('wallets').on('value', snap=>{
+        const wallets = snap.val()||{};
+        db.ref('users').once('value', uSnap=>{
+            const users = uSnap.val()||{};
+            const tb = document.getElementById('wallet-tbody');
+            tb.innerHTML = Object.keys(wallets).map(uid=>{
+                const u = users[uid]||{};
+                const bal = parseFloat(wallets[uid].balance||0).toFixed(2);
+                return `<tr class="table-row" style="border-bottom:1px solid #1e293b;">
+                    <td style="padding:12px 16px;font-weight:600;">${u.name||'Unknown'}</td>
+                    <td style="padding:12px 16px;font-family:monospace;font-size:12px;color:#64748b;">${uid}</td>
+                    <td style="padding:12px 16px;font-weight:700;color:#34d399;">$${bal}</td>
+                </tr>`;
+            }).join('') || '<tr><td colspan="3" style="padding:24px;text-align:center;color:#64748b;">No wallets yet</td></tr>';
+        });
     });
 }
 
-// ─── LINKS ───
+function doAdjust() {
+    const uid = document.getElementById('adj-uid').value.trim();
+    const amt = parseFloat(document.getElementById('adj-amt').value);
+    const type = document.getElementById('adj-type').value;
+    const reason = document.getElementById('adj-reason').value.trim();
+    const note = document.getElementById('adj-note').value.trim();
+    if(!uid||!amt||!reason||!note) return alert('All fields required');
+    if(!confirm(`${type==='credit'?'Add':'Remove'} $${amt} for user ${uid}?`)) return;
+    if(!BACKEND_URL||!ADMIN_SECRET) return alert('Backend URL & Admin Secret needed');
+    fetch(BACKEND_URL+'/api/admin/wallet/adjust',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-admin-secret':ADMIN_SECRET},
+        body:JSON.stringify({userId:uid,amount:amt,type,reason,adminNote:note})
+    }).then(r=>r.json()).then(d=>{
+        if(d.success) alert('Done! New balance: $'+d.newBalance);
+        else alert('Error: '+JSON.stringify(d));
+    });
+}
+
+// ════ LINKS ════
 function fetchLinks() {
-    db.ref('links').once('value', snap => {
-        const l = snap.val() || {};
-        document.getElementById('l-monetag').value = l.monetagZone || '';
-        document.getElementById('l-video').value = l.video || '';
-        document.getElementById('l-botLink').value = l.botLink || '';
-        document.getElementById('l-backendUrl').value = l.backendUrl || '';
-        document.getElementById('l-follow').value = l.follow || '';
-        document.getElementById('l-howTo').value = l.howTo || '';
-        document.getElementById('l-contact').value = l.contact || '';
-        document.getElementById('l-dev').value = PERMANENT_DEV_LINK;
-        document.getElementById('l-privacy').value = l.privacy || '';
-        BACKEND_URL = l.backendUrl || '';
-        localStorage.setItem('backendUrl', BACKEND_URL);
+    db.ref('links').once('value', snap=>{
+        const l = snap.val()||{};
+        document.getElementById('l-monetag').value = l.monetagZone||'';
+        document.getElementById('l-backend').value = l.backendUrl||BACKEND_URL;
+        document.getElementById('l-video').value = l.video||'';
+        document.getElementById('l-bot').value = l.botLink||'';
+        document.getElementById('l-follow').value = l.follow||'';
+        document.getElementById('l-howto').value = l.howTo||'';
+        document.getElementById('l-contact').value = l.contact||'';
+        document.getElementById('l-privacy').value = l.privacy||'';
+        if(l.backendUrl) BACKEND_URL = l.backendUrl;
     });
 }
 
 function saveLinks() {
-    const backendUrl = document.getElementById('l-backendUrl').value.trim();
-    db.ref('links').set({
+    const backendUrl = document.getElementById('l-backend').value.trim();
+    const data = {
         monetagZone: document.getElementById('l-monetag').value.trim(),
+        backendUrl,
         video: document.getElementById('l-video').value.trim(),
-        botLink: document.getElementById('l-botLink').value.trim(),
-        backendUrl: backendUrl,
+        botLink: document.getElementById('l-bot').value.trim(),
         follow: document.getElementById('l-follow').value.trim(),
-        howTo: document.getElementById('l-howTo').value.trim(),
+        howTo: document.getElementById('l-howto').value.trim(),
         contact: document.getElementById('l-contact').value.trim(),
-        dev: PERMANENT_DEV_LINK,
+        dev: DEV_LINK,
         privacy: document.getElementById('l-privacy').value.trim()
-    }, e => {
-        if (!e) {
-            BACKEND_URL = backendUrl;
-            localStorage.setItem('backendUrl', backendUrl);
-            alert('Configuration saved!');
-        }
+    };
+    db.ref('links').set(data).then(()=>{
+        BACKEND_URL = backendUrl;
+        alert('✅ Settings saved!');
     });
 }
 </script>
