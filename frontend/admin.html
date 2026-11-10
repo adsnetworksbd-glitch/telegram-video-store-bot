@@ -426,11 +426,8 @@ function doLogin() {
         }
     }).catch(() => {
         // Backend might not be set yet — allow login with Firebase-only mode
-        const confirmed = confirm("Backend URL not configured. Continue in Firebase-only mode?");
-        if (confirmed) {
-            document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'none';
             initAdmin();
-        }
     });
 }
 
