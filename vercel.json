@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/user.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/admin.html", 
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/", "dest": "/frontend/user.html" },
+    { "src": "/admin", "dest": "/frontend/admin.html" }
+  ]
+}
